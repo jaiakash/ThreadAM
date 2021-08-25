@@ -77,10 +77,8 @@ public class Game extends View {
 
             case MotionEvent.ACTION_DOWN:
                 initialY = event.getY();
-                //Toast.makeText(getContext(), "Touch detected "+event.getY(), Toast.LENGTH_SHORT).show();
                 for(int i=0;i<6;i++) {
-                    if(Math.abs(random_pos[i]-event.getY())<=10) {
-                        Toast.makeText(getContext(), "Touch detected "+i, Toast.LENGTH_SHORT).show();
+                    if(Math.abs(random_pos[i]-event.getY())<=20) {
                         currnt_move = i;
                         break;
                     }
@@ -121,6 +119,34 @@ public class Game extends View {
                 break;
         }
         invalidate();
+
+        if(checkGameOver()) Toast.makeText(getContext(), "Game Over", Toast.LENGTH_SHORT).show();
+
+        return true;
+    }
+
+    private boolean checkGameOver() {
+
+        //Check if there is any line between blue lines
+        for(int i=2;i<=5;i++){
+            if((random_pos[0]<random_pos[i]&&random_pos[1]>random_pos[i]) ||
+                    random_pos[1]<random_pos[i]&&random_pos[0]>random_pos[i])
+            return false;
+        }
+
+        //Check if there is any line between green lines
+        for(int i=0;i<=5;i++){
+            if((random_pos[2]<random_pos[i]&&random_pos[3]>random_pos[i]) ||
+                    random_pos[3]<random_pos[i]&&random_pos[2]>random_pos[i])
+                return false;
+        }
+
+        //Check if there is any line between red lines
+        for(int i=0;i<=3;i++){
+            if((random_pos[4]<random_pos[i]&&random_pos[5]>random_pos[i]) ||
+                    random_pos[5]<random_pos[i]&&random_pos[4]>random_pos[i])
+                return false;
+        }
 
         return true;
     }

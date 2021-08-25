@@ -18,6 +18,7 @@ public class Game extends View {
     Paint paint_blue;
     Paint paint_red;
     Paint paint_green;
+    Paint paint_game;
 
     float initialY;
     int currnt_move=-1;
@@ -32,10 +33,14 @@ public class Game extends View {
         paint_blue = new Paint();
         paint_red = new Paint();
         paint_green = new Paint();
+        paint_game = new Paint();
+
+        paint_game.setColor(Color.BLACK);
         paint_blue.setColor(Color.BLUE);
         paint_green.setColor(Color.GREEN);
         paint_red.setColor(Color.RED);
 
+        paint_game.setTextSize(40);
         paint_green.setStrokeWidth(10);
         paint_red.setStrokeWidth(10);
         paint_blue.setStrokeWidth(10);
@@ -64,6 +69,9 @@ public class Game extends View {
         canvas.drawRect(lines[3],paint_green);
         canvas.drawRect(lines[4],paint_red);
         canvas.drawRect(lines[5],paint_red);
+
+        if(!checkGameOver()) canvas.drawText("Game is running",5,40,paint_game);
+        else canvas.drawText("Game Over",5,40,paint_game);
 
     }
 
@@ -119,8 +127,6 @@ public class Game extends View {
                 break;
         }
         invalidate();
-
-        if(checkGameOver()) Toast.makeText(getContext(), "Game Over", Toast.LENGTH_SHORT).show();
 
         return true;
     }

@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Vibrator;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -43,6 +44,7 @@ public class Game extends View {
         paint_red.setColor(Color.RED);
 
         paint_game.setTextSize(40);
+        paint_game.setFakeBoldText(true);
         paint_green.setStrokeWidth(10);
         paint_red.setStrokeWidth(10);
         paint_blue.setStrokeWidth(10);
@@ -72,15 +74,18 @@ public class Game extends View {
         canvas.drawRect(lines[4],paint_red);
         canvas.drawRect(lines[5],paint_red);
 
-        canvas.drawText("Score :  "+score,450,40,paint_game);
-        canvas.drawText("Time : "+String.format("%.02f", time),750,40,paint_game);
+        canvas.drawText("Score :  "+score,450,60,paint_game);
+        canvas.drawText("Time : "+String.format("%.02f", time),750,60,paint_game);
 
-        if(!checkGameOver()) canvas.drawText("Arrange the threads",5,40,paint_game);
+        if(!checkGameOver()) canvas.drawText("Arrange the threads",5,60,paint_game);
         else {
             canvas.drawText("Game Over",5,40,paint_game);
         }
 
         if(time<0){
+            Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+            v.vibrate(400);
+
             Toast.makeText(getContext(), "You Lost, Your score was : "+score, Toast.LENGTH_SHORT).show();
             score=0;
             time=30;
@@ -91,7 +96,7 @@ public class Game extends View {
     }
 
     private void update() {
-        time-=0.01;
+        time-=0.02;
         invalidate();
     }
 
@@ -141,6 +146,9 @@ public class Game extends View {
 
             case MotionEvent.ACTION_UP:
                 if(checkGameOver()){
+                    Vibrator v = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                    v.vibrate(200);
+
                     Toast.makeText(getContext(), "You won the round", Toast.LENGTH_SHORT).show();
                     randomise_position();
                     score++;

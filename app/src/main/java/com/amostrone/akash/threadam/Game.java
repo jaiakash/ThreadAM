@@ -4,21 +4,31 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Game extends View {
 
+    Rect[] lines = new Rect[6];
+
     Paint paint_blue;
     Paint paint_red;
     Paint paint_green;
 
-    int[] random_pos = new int[6];
+    float initialY;
+    int currnt_move=-1;
+
+    int[] random_pos = {0,0,0,0,0,0};
 
     public Game(Context context) {
         super(context);
+        for(int i=0;i<6;i++)
+            lines[i] = new Rect();
+
         paint_blue = new Paint();
         paint_red = new Paint();
         paint_green = new Paint();
@@ -29,8 +39,6 @@ public class Game extends View {
         paint_green.setStrokeWidth(10);
         paint_red.setStrokeWidth(10);
         paint_blue.setStrokeWidth(10);
-
-        randomise_position();
     }
 
     void randomise_position() {
@@ -41,24 +49,26 @@ public class Game extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if(random_pos[0]==0)randomise_position();
 
-        canvas.drawLine(0, random_pos[0], getWidth(), random_pos[0], paint_blue);
-        canvas.drawLine(0, random_pos[1], getWidth(), random_pos[1], paint_red);
-        canvas.drawLine(0, random_pos[2], getWidth(), random_pos[2], paint_green);
-        canvas.drawLine(0, random_pos[3], getWidth(), random_pos[3], paint_blue);
-        canvas.drawLine(0, random_pos[4], getWidth(), random_pos[4], paint_red);
-        canvas.drawLine(0, random_pos[5], getWidth(), random_pos[5], paint_green);
+        for(int i=0;i<6;i++) {
+            lines[i].left = 0;
+            lines[i].right = getWidth();
+            lines[i].top = random_pos[i];
+            lines[i].bottom = random_pos[i] + 10;
+        }
+
+        canvas.drawRect(lines[0],paint_blue);
+        canvas.drawRect(lines[1],paint_blue);
+        canvas.drawRect(lines[2],paint_green);
+        canvas.drawRect(lines[3],paint_green);
+        canvas.drawRect(lines[4],paint_red);
+        canvas.drawRect(lines[5],paint_red);
 
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
-        // get pointer index from the event object
-        int pointerIndex = event.getActionIndex();
-
-        // get pointer ID
-        int pointerId = event.getPointerId(pointerIndex);
 
         // get masked (not specific to a pointer) action
         int maskedAction = event.getActionMasked();
@@ -66,17 +76,51 @@ public class Game extends View {
         switch (maskedAction) {
 
             case MotionEvent.ACTION_DOWN:
-                randomise_position();
-                invalidate();
+                initialY = event.getY();
+                //Toast.makeText(getContext(), "Touch detected "+event.getY(), Toast.LENGTH_SHORT).show();
+                for(int i=0;i<6;i++) {
+                    if(Math.abs(random_pos[i]-event.getY())<=10) {
+                        Toast.makeText(getContext(), "Touch detected "+i, Toast.LENGTH_SHORT).show();
+                        currnt_move = i;
+                        break;
+                    }
+                    else currnt_move=-1;
+                }
+                // Log.d(TAG, "Action was DOWN");
                 break;
-            case MotionEvent.ACTION_POINTER_DOWN:
+
             case MotionEvent.ACTION_MOVE:
-            case MotionEvent.ACTION_UP:
+
+                //Log.d(TAG, "Action was MOVE");
                 break;
-            case MotionEvent.ACTION_POINTER_UP:
+
+            case MotionEvent.ACTION_UP:
+                float finalX = event.getX();
+                float finalY = event.getY();
+
+                //Log.d(TAG, "Action was UP");
+
+                if (initialY < finalY) {
+                    if(currnt_move!=-1)random_pos[currnt_move]-=initialY-finalY;
+                    // Log.d(TAG, "Up to Down swipe performed");
+                }
+
+                if (initialY > finalY) {
+                    if(currnt_move!=-1)random_pos[currnt_move]+=finalY-initialY;
+                    // Log.d(TAG, "Down to Up swipe performed");
+                }
+
+                break;
+
             case MotionEvent.ACTION_CANCEL:
+                //Log.d(TAG,"Action was CANCEL");
+                break;
+
+            case MotionEvent.ACTION_OUTSIDE:
+                // Log.d(TAG, "Movement occurred outside bounds of current screen element");
+                break;
         }
-        postInvalidate();
+        invalidate();
 
         return true;
     }

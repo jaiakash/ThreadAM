@@ -22,6 +22,8 @@ public class Game extends View {
 
     float initialY;
     int currnt_move=-1;
+    float time=30;
+    int score=0;
 
     int[] random_pos = {0,0,0,0,0,0};
 
@@ -70,9 +72,27 @@ public class Game extends View {
         canvas.drawRect(lines[4],paint_red);
         canvas.drawRect(lines[5],paint_red);
 
-        if(!checkGameOver()) canvas.drawText("Game is running",5,40,paint_game);
-        else canvas.drawText("Game Over",5,40,paint_game);
+        canvas.drawText("Score :  "+score,450,40,paint_game);
+        canvas.drawText("Time : "+String.format("%.02f", time),750,40,paint_game);
 
+        if(!checkGameOver()) canvas.drawText("Arrange the threads",5,40,paint_game);
+        else {
+            canvas.drawText("Game Over",5,40,paint_game);
+        }
+
+        if(time<0){
+            Toast.makeText(getContext(), "You Lost, Your score was : "+score, Toast.LENGTH_SHORT).show();
+            score=0;
+            time=30;
+            randomise_position();
+        }
+        update();
+
+    }
+
+    private void update() {
+        time-=0.01;
+        invalidate();
     }
 
     @Override
@@ -97,25 +117,36 @@ public class Game extends View {
 
             case MotionEvent.ACTION_MOVE:
 
-                //Log.d(TAG, "Action was MOVE");
-                break;
-
-            case MotionEvent.ACTION_UP:
-                float finalX = event.getX();
                 float finalY = event.getY();
 
                 //Log.d(TAG, "Action was UP");
 
                 if (initialY < finalY) {
-                    if(currnt_move!=-1)random_pos[currnt_move]-=initialY-finalY;
+                    if(currnt_move!=-1){
+                        random_pos[currnt_move]-=initialY-finalY;
+                        initialY=finalY;
+                    }
                     // Log.d(TAG, "Up to Down swipe performed");
                 }
 
                 if (initialY > finalY) {
-                    if(currnt_move!=-1)random_pos[currnt_move]+=finalY-initialY;
+                    if(currnt_move!=-1){
+                        random_pos[currnt_move]+=finalY-initialY;
+                        initialY=finalY;
+                    }
                     // Log.d(TAG, "Down to Up swipe performed");
                 }
+                //Log.d(TAG, "Action was MOVE");
+                break;
 
+            case MotionEvent.ACTION_UP:
+                if(checkGameOver()){
+                    Toast.makeText(getContext(), "You won the round", Toast.LENGTH_SHORT).show();
+                    randomise_position();
+                    score++;
+                    time=30;
+                }
+                //Log.d(TAG, "Action was UP");
                 break;
 
             case MotionEvent.ACTION_CANCEL:
